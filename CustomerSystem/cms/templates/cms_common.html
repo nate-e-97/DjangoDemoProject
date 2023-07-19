@@ -5,10 +5,15 @@
     </head>
     <body>
         <h1>Customer Management System</h1>
+        <nav style="position: absolute; top: 10pt; right: 10pt;">
+            <button type="button" onclick="window.location.href='/'">Home</button>
+            <button type="button" onclick="window.location.href='/new'">Create User</button>
+        </nav>
         {% include "partials/"|add:inner_content_partial %}
         <!-- 
             The above allows us to use a unified home page layout and invoke per-page resources
             on a "partial" template, which maintains separation of concerns.
         -->
+        
     </body>
 </html>
