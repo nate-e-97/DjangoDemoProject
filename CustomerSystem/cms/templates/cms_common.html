@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="EN">
+    <head>
+        <title>CMS System - {{ page_title }}</title>
+    </head>
+    <body>
+        <h1>Customer Management System</h1>
+        {% include "partials/"|add:inner_content_partial %}
+        <!-- 
+            The above allows us to use a unified home page layout and invoke per-page resources
+            on a "partial" template, which maintains separation of concerns.
+        -->
+    </body>
+</html>

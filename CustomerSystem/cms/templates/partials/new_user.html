@@ -1,0 +1,169 @@
+<h2>Add New Customer</h2>
+<form id="newCustomerForm">
+    <label for="first_name">First Name <span class="errorLabel"id="first_name_error"></span></label>
+    <input type="text" id="first_name" name="first_name" required><br>
+
+    <label for="last_name">Last Name <span class="errorLabel"id="last_name_error"></span></label>
+    <input type="text" id="last_name" name="last_name" required><br>
+
+    <label for="address">Address <span class="errorLabel"id="address_error"></span></label>
+    <input type="text" id="address" name="address" required><br>
+
+    <label for="city">City <span class="errorLabel"id="city_error"></span></label>
+    <input type="text" id="city" name="city" required><br>
+
+    <label for="state">State <span class="errorLabel"id="state_error"></span></label>
+    <select name="state" id="state" required></select><br> <!-- Populates this programatically below -->
+
+    <label for="zip">Zip Code <span class="errorLabel"id="zip_error"></span></label>
+    <input type="text" id="zip" name="zip" required><br>
+
+    <input type="submit" value="Save" >
+</form>
+
+<style>
+    .invalid {
+        border-color: red;
+    }
+
+    .errorLabel {
+        color: red;
+    }
+</style>
+
+<script>
+    // Using this hard coded here because states are not going to change often
+    let states = {
+        "AL": "Alabama",
+        "AK": "Alaska",
+        "AZ": "Arizona",
+        "AR": "Arkansas",
+        "CA": "California",
+        "CO": "Colorado",
+        "CT": "Connecticut",
+        "DE": "Delaware",
+        "FL": "Florida",
+        "GA": "Georgia",
+        "HI": "Hawaii",
+        "ID": "Idaho",
+        "IL": "Illinois",
+        "IN": "Indiana",
+        "IA": "Iowa",
+        "KS": "Kansas",
+        "KY": "Kentucky",
+        "LA": "Louisiana",
+        "ME": "Maine",
+        "MD": "Maryland",
+        "MA": "Massachusetts",
+        "MI": "Michigan",
+        "MN": "Minnesota",
+        "MS": "Mississippi",
+        "MO": "Missouri",
+        "MT": "Montana",
+        "NE": "Nebraska",
+        "NV": "Nevada",
+        "NH": "New Hampshire",
+        "NJ": "New Jersey",
+        "NM": "New Mexico",
+        "NY": "New York",
+        "NC": "North Carolina",
+        "ND": "North Dakota",
+        "OH": "Ohio",
+        "OK": "Oklahoma",
+        "OR": "Oregon",
+        "PA": "Pennsylvania",
+        "RI": "Rhode Island",
+        "SC": "South Carolina",
+        "SD": "South Dakota",
+        "TN": "Tennessee",
+        "TX": "Texas",
+        "UT": "Utah",
+        "VT": "Vermont",
+        "VA": "Virginia",
+        "WA": "Washington",
+        "WV": "West Virginia",
+        "WI": "Wisconsin",
+        "WY": "Wyoming"
+    }
+
+    Object.keys(states).forEach( stateCode => {
+        let stateOption = document.createElement('option');
+        stateOption.value = stateCode;
+        stateOption.innerHTML = stateCode;
+        document.getElementById('state').appendChild(stateOption);
+    })
+
+    // Submit button listener
+    document.getElementById('newCustomerForm').addEventListener('submit', e => {
+        e.preventDefault(); // prevent default html form submit
+        if (validate()) submit().then( response => {
+            if (response.status==201) window.location.href = "/"
+        })
+    })
+
+    class ValidationRule {
+        /**
+         * field is a String which should be the id of the field it is checking (and will mark as invalid if validation fails)
+         * rule is a function that should return true if it validates correctly, otherwise should return false 
+         */
+        constructor(field, rule, reason="Invalid Field") {
+            if (typeof field === "string") this.field = field;
+            else throw new Error("Validation Rule Field must be String")
+
+            if (typeof rule === "function" && rule.length == 0) this.rule = rule;
+            else throw new Error("Validation Rule Function must be Function with 0 arguments")
+
+            this.reason = reason
+        }
+
+        runValidation() {
+            if (this.rule()) {
+                document.getElementById(this.field).classList.remove("invalid")
+                document.getElementById(`${this.field}_error`).innerHTML = ''
+                return true
+            }
+            else {
+                document.getElementById(this.field).classList.add("invalid")
+                document.getElementById(`${this.field}_error`).innerHTML = this.reason
+                return false
+            }
+        }
+    }
+
+    let validationRules = [
+        new ValidationRule('first_name', () => {return (document.getElementById('first_name').value != '')}), // Check that first_name is not empty
+        new ValidationRule('last_name', () => {return (document.getElementById('last_name').value != '')}), // Check that last_name is not empty
+        new ValidationRule('address', () => {return (document.getElementById('address').value != '')}), // Check that address is not empty
+        new ValidationRule('city', () => {return (document.getElementById('city').value != '')}), // Check that city is not empty
+        new ValidationRule('state', () => {return (document.getElementById('state').value != '')}), // Check that state is not empty
+        new ValidationRule('zip', () => {return (document.getElementById('zip').value != '')}), // Check that zip is not empty
+        new ValidationRule('zip', () => {
+            return /^\d{5}$|^\d{5}[+]\d{4}$/.test(document.getElementById('zip').value) // Check that zip is in the form ##### or #####+####
+        }, "Zip must be either in the form of 12345 or 12345+1234")
+    ]
+
+    function validate() {
+        return validationRules.every(e => e.runValidation())
+    }
+
+    async function submit() {
+        let newCustomerBody = {
+            first_name: document.getElementById('first_name').value,
+            last_name: document.getElementById('last_name').value,
+            address: document.getElementById('address').value,
+            city: document.getElementById('city').value,
+            zip: document.getElementById('zip').value,
+            state: document.getElementById('state').value
+        };
+
+        let response = await fetch("/users", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(newCustomerBody)
+        });
+
+        return response;
+    }
+</script>

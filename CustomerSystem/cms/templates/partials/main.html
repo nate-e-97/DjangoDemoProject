@@ -1,0 +1,50 @@
+<h2>Home Page</h2>
+<button onclick="window.location.href='/new'">Create User</button>
+<table style="padding: 2pt;">
+    <tr style="font-weight: bold;">
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Street Address</th>
+        <th>City</th>
+        <th>State</th>
+        <th>ZIP</th>
+        <th>Delete?</th>
+    </tr>
+    {% for customer in customers %}
+        <tr>
+            <td>{{ customer.first_name }}</td>
+            <td>{{ customer.last_name }}</td>
+            <td>{{ customer.address }}</td>
+            <td>{{ customer.city }}</td>
+            <td>{{ customer.state }}</td>
+            <td>{{ customer.zip }}</td>
+            <td>
+                <!-- Button calls deleteCustomer function delcared below- if delete is successful, reload page (which will now show that the customer is gone) -->
+                <button 
+                    onclick="deleteCustomer({{ customer.id }}).then(response => {if (response.status==204) window.location.reload()})"
+                    style="background-color: red;">
+                    Delete
+                </button>
+            </td>
+        </tr>
+    {% empty %}
+        <tr>
+            <td colspan="7">No customers in database.</td>
+        </tr>
+    {% endfor %}
+</table>
+
+{% if page_number > 1 %}
+    <button onclick="window.location.href='/?page={{page_number|add:'-1'}}'">Prev</button> <!-- Dynamically link to previous page if one exists -->
+{% endif %}
+{% if has_next_page %}
+    <button onclick="window.location.href='/?page={{page_number|add:'1'}}'">Next</button> <!-- Dynamically link to next page if one exists -->
+{% endif %}
+
+<script>
+    async function deleteCustomer(customerId) {
+        return await fetch(`/users?customerId=${customerId}`, {
+            method: "DELETE"
+        })
+    }
+</script>
